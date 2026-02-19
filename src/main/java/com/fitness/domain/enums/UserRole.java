@@ -4,7 +4,7 @@ public enum UserRole {
     PERSONAL,
     ALUNO,
     ADMIN,
-    TERAPEUTA,
+    FISIOTERAPEUTA,
     QUIROPRAXISTA,
     NUTROLOGO
 }
