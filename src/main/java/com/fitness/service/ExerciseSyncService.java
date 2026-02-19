@@ -45,41 +45,67 @@ public class ExerciseSyncService {
     }
 
     public void syncByMuscle(String muscle, int limit, int page) {
-        List<Map<String, Object>> result = client.search(null, muscle, limit, page);
-        for (Map<String, Object> item : result) {
-            upsertFromExternal(item);
+        try {
+            log.info("[SYNC] Iniciando busca para musculo='{}' (pagina {})", muscle, page);
+            List<Map<String, Object>> result = client.search(null, muscle, limit, page);
+            if (result == null || result.isEmpty()) {
+                log.info("[SYNC] Nenhum resultado retornado para musculo='{}'", muscle);
+                return;
+            }
+            int count = 0;
+            for (Map<String, Object> item : result) {
+                try {
+                    upsertFromExternal(item);
+                    count++;
+                } catch (Exception e) {
+                    log.error("[SYNC] Erro ao processar item: {}", e.getMessage());
+                }
+            }
+            log.info("[SYNC] Sucesso: musculo='{}' sincronizados {} de {} registros", muscle, count, result.size());
+        } catch (Exception e) {
+            log.error("[SYNC] ERRO FATAL ao sincronizar musculo '{}': {}", muscle, e.getMessage(), e);
         }
-        log.info("[SYNC] Musculo='{}' sincronizados {} registros (pagina {})", muscle, result.size(), page);
     }
 
     public Exercise upsertFromExternal(Map<String, Object> m) {
-        String externalId = getString(m, "id", getString(m, "_id", null));
-        String name = getString(m, "name", getString(m, "exercise_name", "unknown"));
-        // Tentativas de mapear campos comuns
-        String muscle = joinCandidates(m,
-                List.of("primaryMuscles", "target", "bodyPart", "muscle"));
-        String equipment = joinCandidates(m,
-                List.of("equipment", "equipmentRequired"));
-        String imageUrl = firstNonBlank(
-                getString(m, "image", null),
-                getString(m, "imageUrl", null),
-                getString(m, "gifUrl", null)
-        );
-        String videoUrl = firstNonBlank(
-                getString(m, "videoUrl", null),
-                getString(m, "videoURL", null),
-                getString(m, "video", null)
-        );
+        try {
+            String externalId = getString(m, "id", getString(m, "_id", null));
+            if (externalId == null) {
+                log.warn("[SYNC] Item ignorado: externalId nulo. Mapa: {}", m);
+                return null;
+            }
+            String name = getString(m, "name", getString(m, "exercise_name", "unknown"));
+            
+            String muscle = joinCandidates(m, List.of("primaryMuscles", "target", "bodyPart", "muscle"));
+            String equipment = joinCandidates(m, List.of("equipment", "equipmentRequired"));
+            
+            String imageUrl = firstNonBlank(
+                    getString(m, "image", null),
+                    getString(m, "imageUrl", null),
+                    getString(m, "gifUrl", null)
+            );
+            String videoUrl = firstNonBlank(
+                    getString(m, "videoUrl", null),
+                    getString(m, "videoURL", null),
+                    getString(m, "video", null)
+            );
 
-        Exercise entity = repository.findByExternalId(externalId).orElse(
-                new Exercise(externalId, name, muscle, equipment, imageUrl, videoUrl)
-        );
-        entity.setName(name);
-        entity.setPrimaryMuscles(muscle);
-        entity.setEquipment(equipment);
-        entity.setImageUrl(imageUrl);
-        entity.setVideoUrl(videoUrl);
-        return repository.save(entity);
+            Exercise entity = repository.findByExternalId(externalId).orElse(new Exercise());
+            entity.setExternalId(externalId);
+            entity.setName(name);
+            entity.setPrimaryMuscles(muscle);
+            entity.setEquipment(equipment);
+            entity.setImageUrl(imageUrl);
+            entity.setVideoUrl(videoUrl);
+            entity.setLastSyncedAt(java.time.LocalDateTime.now());
+            
+            Exercise saved = repository.save(entity);
+            log.debug("[SYNC] Exercício salvo/atualizado: {} (ID: {})", name, externalId);
+            return saved;
+        } catch (Exception e) {
+            log.error("[SYNC] Erro no upsert: {}", e.getMessage());
+            throw e;
+        }
     }
 
     private static String getString(Map<String, Object> m, String key, String def) {
