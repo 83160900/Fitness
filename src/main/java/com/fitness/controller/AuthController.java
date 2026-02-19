@@ -1,10 +1,8 @@
 package com.fitness.controller;
 
-import com.fitness.domain.model.User;
 import com.fitness.dto.LoginRequest;
 import com.fitness.dto.LoginResponse;
 import com.fitness.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @org.springframework.web.bind.annotation.CrossOrigin(origins = "*")
 public class AuthController {
 
     private final UserRepository userRepository;
+
+    public AuthController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
