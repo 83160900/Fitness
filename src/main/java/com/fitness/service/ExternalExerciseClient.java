@@ -41,7 +41,7 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃƒÂ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
@@ -53,21 +53,27 @@ public class ExternalExerciseClient {
         StringBuilder url = new StringBuilder(baseUrl);
         if (!baseUrl.endsWith("/")) url.append("/");
         
-        // Based on the 404 error, /exercises was not found. 
-        // For this AscendAPI exercise database, the base endpoints are usually:
-        // /exercisedb/list (or similar). Let's use the provided baseUrl strictly.
-        // We'll try to append "/" and if searching by muscle, use its specific endpoint pattern.
+        // For this AscendAPI exercise database, common patterns:
+        // 1. /exercises (all)
+        // 2. /exercises/muscle/{muscleName}
+        // 3. /exercises/name/{name}
         
+        // Let's try to be flexible. We'll use muscle in path if provided.
         if (muscle != null && !muscle.isBlank()) {
-            url.append("exercises/muscle/").append(muscle);
+            // Normalize muscle names for some common variants in APIs
+            String normMuscle = muscle.toLowerCase().trim();
+            if (normMuscle.equals("core")) normMuscle = "abs"; // "abs" is more common than "core"
+            url.append("exercises/muscle/").append(normMuscle);
         } else {
             url.append("exercises");
         }
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        // Query params vary: some use 'name', some use 'muscle' (if not in path)
         if (query != null && !query.isBlank()) params.add("name", query);
-        // muscle already added to path
+        
         if (limit != null) params.add("limit", String.valueOf(limit));
+        // page vs offset: some use page, some use offset
         if (page != null) params.add("page", String.valueOf(page));
 
         if (!params.isEmpty()) {
@@ -87,10 +93,11 @@ public class ExternalExerciseClient {
         try {
             ResponseEntity<String> responseRaw = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, String.class);
             String responseBody = responseRaw.getBody();
-            System.out.println("[DEBUG_LOG] API: Resposta bruta recebida (parcial): " + (responseBody != null && responseBody.length() > 200 ? responseBody.substring(0, 200) : responseBody));
+            System.out.println("[DEBUG_LOG] API: Resposta HTTP " + responseRaw.getStatusCode() + " recebida.");
+            System.out.println("[DEBUG_LOG] API: Resposta bruta (parcial): " + (responseBody != null && responseBody.length() > 200 ? responseBody.substring(0, 200) : responseBody));
 
-            if (responseBody == null || responseBody.trim().isEmpty() || responseBody.trim().equals("[]")) {
-                System.out.println("[DEBUG_LOG] API: Resposta vazia ou lista vazia [] recebida da RapidAPI.");
+            if (responseBody == null || responseBody.trim().isEmpty() || responseBody.trim().equals("[]") || responseBody.trim().equals("{}")) {
+                System.out.println("[DEBUG_LOG] API: Resposta vazia ou sem dados recebida.");
                 return Collections.emptyList();
             }
 
