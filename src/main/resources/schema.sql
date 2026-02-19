@@ -1,5 +1,5 @@
 -- Ensure the core table exists to avoid runtime errors during first inserts
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
@@ -12,4 +12,11 @@ CREATE TABLE IF NOT EXISTS users (
   photo_url VARCHAR(1024),
   lgpd_consent BOOLEAN NOT NULL DEFAULT FALSE,
   active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Ensure relation table exists
+CREATE TABLE IF NOT EXISTS public.user_professionals (
+  student_id UUID NOT NULL REFERENCES public.users(id),
+  professional_id UUID NOT NULL REFERENCES public.users(id),
+  PRIMARY KEY (student_id, professional_id)
 );
