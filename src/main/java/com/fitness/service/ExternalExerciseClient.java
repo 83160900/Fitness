@@ -41,7 +41,7 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃƒÂ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃƒÆ’Ã‚Â£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
@@ -53,27 +53,33 @@ public class ExternalExerciseClient {
         StringBuilder url = new StringBuilder(baseUrl);
         if (!baseUrl.endsWith("/")) url.append("/");
         
-        // For this AscendAPI exercise database, common patterns:
-        // 1. /exercises (all)
-        // 2. /exercises/muscle/{muscleName}
-        // 3. /exercises/name/{name}
+        // For AscendAPI (edb-with-videos-and-images-by-ascendapi):
+        // Common working endpoint patterns for this specific API:
+        // 1. Base URL + /exercises
+        // 2. Base URL + /exercises/target/{target}
+        // 3. Base URL + /exercises/bodyPart/{bodyPart}
         
-        // Let's try to be flexible. We'll use muscle in path if provided.
+        // Based on the 404 errors for /exercises/muscle/..., let's try /exercises/bodyPart/
+        // and /exercises/target/ as fallbacks or primary choice.
         if (muscle != null && !muscle.isBlank()) {
-            // Normalize muscle names for some common variants in APIs
             String normMuscle = muscle.toLowerCase().trim();
-            if (normMuscle.equals("core")) normMuscle = "abs"; // "abs" is more common than "core"
-            url.append("exercises/muscle/").append(normMuscle);
+            // Map common muscle groups to likely API bodyPart/target values
+            if (normMuscle.equals("chest")) url.append("exercises/target/pectorals");
+            else if (normMuscle.equals("back")) url.append("exercises/target/lats");
+            else if (normMuscle.equals("legs")) url.append("exercises/bodyPart/upper%20legs");
+            else if (normMuscle.equals("abs") || normMuscle.equals("core")) url.append("exercises/bodyPart/waist");
+            else if (normMuscle.equals("shoulders")) url.append("exercises/target/delts");
+            else if (normMuscle.equals("biceps")) url.append("exercises/target/biceps");
+            else if (normMuscle.equals("triceps")) url.append("exercises/target/triceps");
+            else url.append("exercises");
         } else {
             url.append("exercises");
         }
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        // Query params vary: some use 'name', some use 'muscle' (if not in path)
         if (query != null && !query.isBlank()) params.add("name", query);
         
         if (limit != null) params.add("limit", String.valueOf(limit));
-        // page vs offset: some use page, some use offset
         if (page != null) params.add("page", String.valueOf(page));
 
         if (!params.isEmpty()) {
