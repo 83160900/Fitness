@@ -34,3 +34,26 @@ CREATE TABLE IF NOT EXISTS public.exercises (
     updated_at TIMESTAMP,
     source VARCHAR(255) DEFAULT 'ascendapi'
 );
+
+-- Tabela de Planos de Treino
+CREATE TABLE IF NOT EXISTS public.workout_plans (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    coach_id UUID NOT NULL REFERENCES public.users(id),
+    student_id UUID REFERENCES public.users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT TRUE
+);
+
+-- Tabela de Exercicios dentro do Treino (Itens do Treino)
+CREATE TABLE IF NOT EXISTS public.workout_exercises (
+    id UUID PRIMARY KEY,
+    workout_plan_id UUID NOT NULL REFERENCES public.workout_plans(id) ON DELETE CASCADE,
+    exercise_id UUID NOT NULL REFERENCES public.exercises(id),
+    sets INTEGER,
+    reps VARCHAR(50),
+    rest_time VARCHAR(50),
+    exercise_order INTEGER,
+    observations TEXT
+);
