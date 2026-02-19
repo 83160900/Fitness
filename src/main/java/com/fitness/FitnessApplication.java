@@ -14,15 +14,28 @@ public class FitnessApplication {
             String port = System.getenv("PGPORT") != null ? System.getenv("PGPORT") : System.getenv("POSTGRES_PORT");
             String db = System.getenv("PGDATABASE") != null ? System.getenv("PGDATABASE") : System.getenv("POSTGRES_DB");
             if (host != null) {
-                dbUrl = "jdbc:postgresql://" + host + ":" + (port != null ? port : "5432") + "/" + (db != null ? db : "fitnessdb");
+                host = host.trim();
+                port = (port != null) ? port.trim() : "5432";
+                db = (db != null) ? db.trim() : "fitnessdb";
+                dbUrl = "jdbc:postgresql://" + host + ":" + port + "/" + db;
             }
         }
         
-        System.out.println("[DEBUG_LOG] Iniciando aplicação...");
+        String user = System.getenv("SPRING_DATASOURCE_USERNAME");
+        if (user == null) user = System.getenv("PGUSER");
+        if (user == null) user = System.getenv("POSTGRES_USER");
+        
+        System.out.println("[DEBUG_LOG] Iniciando aplicacao...");
         if (dbUrl != null) {
             System.out.println("[DEBUG_LOG] Tentando conectar ao banco: " + dbUrl.split("\\?")[0]);
+            if (user != null) {
+                System.out.println("[DEBUG_LOG] Usuario detectado: '" + user + "' (tamanho: " + user.length() + ")");
+                if (user.endsWith(" ")) {
+                    System.out.println("[DEBUG_LOG] AVISO: O usuario possui um espaco em branco no final!");
+                }
+            }
         } else {
-            System.out.println("[DEBUG_LOG] Nenhuma variável de banco detectada, usando padrão de application.properties");
+            System.out.println("[DEBUG_LOG] Nenhuma variavel de banco detectada, usando padrao de application.properties");
         }
         
         SpringApplication.run(FitnessApplication.class, args);
