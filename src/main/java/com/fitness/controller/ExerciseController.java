@@ -35,16 +35,23 @@ public class ExerciseController {
         return ResponseEntity.ok("API de Exercicios operacional!");
     }
 
-    @PostMapping("/sync")
+    @RequestMapping(value = "/sync", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<?> triggerSync() {
         try {
-            System.out.println("[DEBUG_LOG] Sync: Recebido pedido de sincronizacao manual...");
+            System.out.println("[DEBUG_LOG] Sync: Recebido pedido de sincronizacao (Manual/GET/POST)...");
             syncService.seedCommonBatches();
             System.out.println("[DEBUG_LOG] Sync: Sincronizacao disparada com sucesso.");
-            return ResponseEntity.accepted().body(Map.of("message", "Sincronizacao iniciada em segundo plano!"));
+            return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Sincronizacao de exercicios iniciada com sucesso em segundo plano!",
+                "timestamp", java.time.Instant.now().toString()
+            ));
         } catch (Exception e) {
             System.err.println("[DEBUG_LOG] Sync: ERRO AO DISPARAR - " + e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of(
+                "status", "error",
+                "message", "Falha ao disparar sincronizacao: " + e.getMessage()
+            ));
         }
     }
 }
