@@ -1,4 +1,4 @@
-package com.fitness;
+﻿package com.fitness;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +30,11 @@ public class FitnessApplication {
                         "specialty VARCHAR(255), registration_number VARCHAR(255), " +
                         "formation TEXT, experience TEXT, photo_url VARCHAR(1024), " +
                         "lgpd_consent BOOLEAN NOT NULL DEFAULT FALSE, active BOOLEAN NOT NULL DEFAULT TRUE)");
+
+                // Evolução de schema: acrescentar colunas novas de forma idempotente
+                jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS cpf VARCHAR(255) UNIQUE");
+                jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS address VARCHAR(255)");
+                jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS force_password_change BOOLEAN NOT NULL DEFAULT FALSE");
                 
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS public.exercises (" +
                         "id UUID PRIMARY KEY, external_id VARCHAR(255), name VARCHAR(255) NOT NULL, " +

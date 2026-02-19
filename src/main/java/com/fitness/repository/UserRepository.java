@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
+    Optional<User> findByCpf(String cpf);
     
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u JOIN u.professionals p WHERE p.email = :coachEmail")
     List<User> findByCoachEmail(String coachEmail);

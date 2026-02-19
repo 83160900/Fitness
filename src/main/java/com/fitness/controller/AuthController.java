@@ -22,55 +22,88 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+            String identifier = null;
+            if (request.getUser() != null && !request.getUser().trim().isEmpty()) {
+                identifier = request.getUser().trim();
+            } else if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+                identifier = request.getEmail().trim().toLowerCase();
+            } else {
+                return ResponseEntity.badRequest().body("Informe CPF ou e-mail.");
+            }
+
             String password = request.getPassword() != null ? request.getPassword().trim() : "";
-            
-            System.out.println("[DEBUG_LOG] Login: Tentativa para '" + email + "'");
-            
+            System.out.println("[DEBUG_LOG] Login: Tentativa para '" + identifier + "'");
+
             try {
-                return userRepository.findByEmail(email)
+                java.util.Optional<User> optUser;
+                String onlyDigits = identifier.replaceAll("\\D", "");
+                if (onlyDigits.length() == 11) {
+                    optUser = userRepository.findByCpf(onlyDigits);
+                } else {
+                    optUser = userRepository.findByEmail(identifier.toLowerCase());
+                }
+
+                return optUser
                         .map(user -> {
-                            try {
-                                String storedPassword = user.getPassword() != null ? user.getPassword().trim() : "";
-                                System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' encontrado no banco.");
-                                System.out.println("[DEBUG_LOG] Login: Role=" + user.getRole() + ", Active=" + user.isActive());
-                                
-                                if (storedPassword.equals(password)) {
-                                    System.out.println("[DEBUG_LOG] Login: Senha correta para " + email);
-                                    return ResponseEntity.ok(LoginResponse.builder()
-                                            .name(user.getName())
-                                            .email(user.getEmail())
-                                            .role(user.getRole())
-                                            .specialty(user.getSpecialty())
-                                            .registrationNumber(user.getRegistrationNumber())
-                                            .photoUrl(user.getPhotoUrl())
-                                            .message("Login realizado com sucesso!")
-                                            .build());
-                                } else {
-                                    System.out.println("[DEBUG_LOG] Login: Senha incorreta para '" + email + "'.");
-                                    return ResponseEntity.status(401).body("Credenciais invÃ¡lidas!");
-                                }
-                            } catch (Exception e) {
-                                System.err.println("[DEBUG_LOG] Login: Erro interno ao processar usuario - " + e.getMessage());
-                                e.printStackTrace();
-                                throw new RuntimeException(e);
+                            String storedPassword = user.getPassword() != null ? user.getPassword().trim() : "";
+                            if (storedPassword.equals(password)) {
+                                System.out.println("[DEBUG_LOG] Login: OK para '" + identifier + "'. ForceChange=" + user.isForcePasswordChange());
+                                return ResponseEntity.ok(LoginResponse.builder()
+                                        .name(user.getName())
+                                        .email(user.getEmail())
+                                        .role(user.getRole())
+                                        .specialty(user.getSpecialty())
+                                        .registrationNumber(user.getRegistrationNumber())
+                                        .photoUrl(user.getPhotoUrl())
+                                        .forcePasswordChange(user.isForcePasswordChange())
+                                        .message("Login realizado com sucesso!")
+                                        .build());
+                            } else {
+                                return ResponseEntity.status(401).body("Credenciais inválidas!");
                             }
                         })
-                        .orElseGet(() -> {
-                            System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' NAO encontrado no banco.");
-                            return ResponseEntity.status(401).body("Credenciais invÃ¡lidas!");
-                        });
+                        .orElseGet(() -> ResponseEntity.status(401).body("Credenciais inválidas!"));
             } catch (org.springframework.dao.DataAccessException dae) {
                 System.err.println("[DEBUG_LOG] Login: ERRO DE BANCO - " + dae.getMessage());
-                if (dae.getMostSpecificCause() != null) {
-                    System.err.println("[DEBUG_LOG] Causa EspecÃ­fica: " + dae.getMostSpecificCause().getMessage());
-                }
-                return ResponseEntity.status(500).body("Erro de Banco de Dados durante login: " + dae.getMostSpecificCause().getMessage());
+                String cause = dae.getMostSpecificCause() != null ? dae.getMostSpecificCause().getMessage() : dae.getMessage();
+                return ResponseEntity.status(500).body("Erro de Banco de Dados durante login: " + cause);
             }
         } catch (Exception e) {
             System.err.println("[DEBUG_LOG] Login: ERRO CRITICO - " + e.getClass().getName() + " : " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body("Erro Interno no Servidor: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody com.fitness.dto.ChangePasswordRequest req) {
+        try {
+            if (req.getNewPassword() == null || req.getNewPassword().trim().length() < 4) {
+                return ResponseEntity.badRequest().body("Nova senha inválida");
+            }
+            String identifier = req.getUser() != null ? req.getUser().trim() : (req.getEmail() != null ? req.getEmail().trim().toLowerCase() : null);
+            if (identifier == null || identifier.isEmpty()) {
+                return ResponseEntity.badRequest().body("Informe CPF ou e-mail");
+            }
+            java.util.Optional<User> optUser;
+            String onlyDigits = identifier.replaceAll("\\D", "");
+            if (onlyDigits.length() == 11) {
+                optUser = userRepository.findByCpf(onlyDigits);
+            } else {
+                optUser = userRepository.findByEmail(identifier.toLowerCase());
+            }
+            return optUser.map(u -> {
+                String current = u.getPassword() != null ? u.getPassword().trim() : "";
+                if (req.getCurrentPassword() != null && current.equals(req.getCurrentPassword().trim())) {
+                    u.setPassword(req.getNewPassword().trim());
+                    u.setForcePasswordChange(false);
+                    userRepository.save(u);
+                    return ResponseEntity.ok("Senha alterada com sucesso");
+                }
+                return ResponseEntity.status(401).body("Senha atual incorreta");
+            }).orElseGet(() -> ResponseEntity.status(404).body("Usuário não encontrado"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao alterar senha: " + e.getMessage());
         }
     }
 

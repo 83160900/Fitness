@@ -10,6 +10,7 @@ public class LoginResponse {
     private String registrationNumber;
     private String photoUrl;
     private String message;
+    private boolean forcePasswordChange;
 
     public LoginResponse() {}
 
@@ -88,6 +89,7 @@ public class LoginResponse {
         private String registrationNumber;
         private String photoUrl;
         private String message;
+        private boolean forcePasswordChange;
 
         public Builder name(String name) {
             this.name = name;
@@ -124,12 +126,26 @@ public class LoginResponse {
             return this;
         }
 
+        public Builder forcePasswordChange(boolean forcePasswordChange) {
+            this.forcePasswordChange = forcePasswordChange;
+            return this;
+        }
+
         public LoginResponse build() {
             LoginResponse response = new LoginResponse(name, email, role, message);
             response.setSpecialty(this.specialty);
             response.setRegistrationNumber(this.registrationNumber);
             response.setPhotoUrl(this.photoUrl);
+            response.setForcePasswordChange(this.forcePasswordChange);
             return response;
         }
+    }
+
+    public boolean isForcePasswordChange() {
+        return forcePasswordChange;
+    }
+
+    public void setForcePasswordChange(boolean forcePasswordChange) {
+        this.forcePasswordChange = forcePasswordChange;
     }
 }

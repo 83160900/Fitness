@@ -49,6 +49,14 @@ public class User {
 
     private boolean active = true;
 
+    @Column(unique = true)
+    private String cpf; // Identificador para login do aluno
+
+    private String address; // Endereço do aluno
+
+    @Column(nullable = false)
+    private boolean forcePasswordChange = false; // Forçar troca de senha no primeiro login
+
     public User() {}
 
     public User(UUID id, String email, String password, String name, UserRole role, boolean active) {
@@ -162,5 +170,28 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public boolean isForcePasswordChange() {
+        return forcePasswordChange;
+    }
+
+    public void setForcePasswordChange(boolean forcePasswordChange) {
+        this.forcePasswordChange = forcePasswordChange;
     }
 }

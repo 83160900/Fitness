@@ -1,10 +1,20 @@
 package com.fitness.dto;
 
 public class LoginRequest {
-    private String email;
+    // Pode ser e-mail ou CPF
+    private String user;
+    private String email; // compatibilidade retroativa
     private String password;
 
     public LoginRequest() {}
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
 
     public String getEmail() {
         return email;
