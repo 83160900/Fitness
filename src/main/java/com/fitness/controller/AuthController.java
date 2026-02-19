@@ -21,12 +21,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        System.out.println("[DEBUG_LOG] Tentativa de login para o e-mail: " + request.getEmail());
-        return userRepository.findByEmail(request.getEmail())
+        String email = request.getEmail() != null ? request.getEmail().trim() : "";
+        String password = request.getPassword() != null ? request.getPassword().trim() : "";
+        
+        System.out.println("[DEBUG_LOG] Login: Tentativa para '" + email + "'");
+        
+        return userRepository.findByEmail(email)
                 .map(user -> {
-                    System.out.println("[DEBUG_LOG] Usuário encontrado: " + user.getEmail());
-                    if (user.getPassword().equals(request.getPassword())) {
-                        System.out.println("[DEBUG_LOG] Senha correta para o usuário: " + user.getEmail());
+                    String storedPassword = user.getPassword() != null ? user.getPassword().trim() : "";
+                    System.out.println("[DEBUG_LOG] Login: Usuario encontrado. Role: " + user.getRole());
+                    
+                    if (storedPassword.equals(password)) {
+                        System.out.println("[DEBUG_LOG] Login: Senha correta!");
                         return ResponseEntity.ok(LoginResponse.builder()
                                 .name(user.getName())
                                 .email(user.getEmail())
@@ -37,12 +43,12 @@ public class AuthController {
                                 .message("Login realizado com sucesso!")
                                 .build());
                     } else {
-                        System.out.println("[DEBUG_LOG] Senha incorreta para o usuário: " + user.getEmail());
+                        System.out.println("[DEBUG_LOG] Login: Senha incorreta. Enviada: '" + password + "', Banco: '" + storedPassword + "'");
                         return ResponseEntity.status(401).body("Credenciais inválidas!");
                     }
                 })
                 .orElseGet(() -> {
-                    System.out.println("[DEBUG_LOG] Usuário não encontrado para o e-mail: " + request.getEmail());
+                    System.out.println("[DEBUG_LOG] Login: Usuario nao encontrado para '" + email + "'");
                     return ResponseEntity.status(401).body("Credenciais inválidas!");
                 });
     }
