@@ -41,7 +41,7 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃƒÆ’Ã‚Â£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
@@ -54,24 +54,26 @@ public class ExternalExerciseClient {
         if (!baseUrl.endsWith("/")) url.append("/");
         
         // For AscendAPI (edb-with-videos-and-images-by-ascendapi):
-        // Common working endpoint patterns for this specific API:
-        // 1. Base URL + /exercises
-        // 2. Base URL + /exercises/target/{target}
-        // 3. Base URL + /exercises/bodyPart/{bodyPart}
+        // If /exercises/target/ pectorals gave 404, it's possible the prefix is different.
+        // Some variants of this API use /exercise/target/ (singular) or just /target/
         
-        // Based on the 404 errors for /exercises/muscle/..., let's try /exercises/bodyPart/
-        // and /exercises/target/ as fallbacks or primary choice.
+        // Let's try the pattern: /exercise/target/{target} or /exercise/bodyPart/{bodyPart}
         if (muscle != null && !muscle.isBlank()) {
             String normMuscle = muscle.toLowerCase().trim();
-            // Map common muscle groups to likely API bodyPart/target values
-            if (normMuscle.equals("chest")) url.append("exercises/target/pectorals");
-            else if (normMuscle.equals("back")) url.append("exercises/target/lats");
-            else if (normMuscle.equals("legs")) url.append("exercises/bodyPart/upper%20legs");
-            else if (normMuscle.equals("abs") || normMuscle.equals("core")) url.append("exercises/bodyPart/waist");
-            else if (normMuscle.equals("shoulders")) url.append("exercises/target/delts");
-            else if (normMuscle.equals("biceps")) url.append("exercises/target/biceps");
-            else if (normMuscle.equals("triceps")) url.append("exercises/target/triceps");
-            else url.append("exercises");
+            String pathPart = "";
+            if (normMuscle.equals("chest")) pathPart = "target/pectorals";
+            else if (normMuscle.equals("back")) pathPart = "target/lats";
+            else if (normMuscle.equals("legs")) pathPart = "bodyPart/upper%20legs";
+            else if (normMuscle.equals("abs") || normMuscle.equals("core")) pathPart = "bodyPart/waist";
+            else if (normMuscle.equals("shoulders")) pathPart = "target/delts";
+            else if (normMuscle.equals("biceps")) pathPart = "target/biceps";
+            else if (normMuscle.equals("triceps")) pathPart = "target/triceps";
+            
+            if (!pathPart.isEmpty()) {
+                url.append("exercise/").append(pathPart); // singular 'exercise'
+            } else {
+                url.append("exercises");
+            }
         } else {
             url.append("exercises");
         }
