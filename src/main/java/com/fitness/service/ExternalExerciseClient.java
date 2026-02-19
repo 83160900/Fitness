@@ -41,7 +41,7 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃƒÂ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
@@ -69,20 +69,27 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Chamando URL: " + url.toString());
         
         try {
-            ResponseEntity<List> response = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, List.class);
-            List body = response.getBody();
-            if (body == null) {
-                System.out.println("[DEBUG_LOG] API: Resposta vazia (null) recebida.");
+            ResponseEntity<String> responseRaw = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, String.class);
+            String responseBody = responseRaw.getBody();
+            System.out.println("[DEBUG_LOG] API: Resposta bruta recebida (parcial): " + (responseBody != null && responseBody.length() > 200 ? responseBody.substring(0, 200) : responseBody));
+
+            if (responseBody == null || responseBody.trim().isEmpty() || responseBody.trim().equals("[]")) {
+                System.out.println("[DEBUG_LOG] API: Resposta vazia ou lista vazia [] recebida da RapidAPI.");
                 return Collections.emptyList();
             }
-            System.out.println("[DEBUG_LOG] API: Sucesso! Recebidos " + body.size() + " itens.");
+
+            // Tentar converter de String para List<Map>
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            List<Map<String, Object>> body = mapper.readValue(responseBody, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+            
+            System.out.println("[DEBUG_LOG] API: Sucesso! Parse realizado em " + body.size() + " itens.");
             return body;
         } catch (Exception e) {
-            System.err.println("[DEBUG_LOG] API: ERRO NA REQUISICAO - " + e.getMessage());
-            if (e instanceof org.springframework.web.client.HttpClientErrorException hcee) {
-                System.err.println("[DEBUG_LOG] API: Status Code: " + hcee.getStatusCode() + " | Body: " + hcee.getResponseBodyAsString());
+            System.err.println("[DEBUG_LOG] API: ERRO NA REQUISICAO - " + e.getClass().getSimpleName() + " : " + e.getMessage());
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException sce) {
+                System.err.println("[DEBUG_LOG] API: Status HTTP: " + sce.getStatusCode() + " | Resposta: " + sce.getResponseBodyAsString());
             }
-            throw e;
+            throw new RuntimeException("Erro ao buscar exercicios na RapidAPI: " + e.getMessage(), e);
         }
     }
 }
