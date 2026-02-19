@@ -20,3 +20,17 @@ CREATE TABLE IF NOT EXISTS public.user_professionals (
   professional_id UUID NOT NULL REFERENCES public.users(id),
   PRIMARY KEY (student_id, professional_id)
 );
+
+-- Ensure exercises table exists for the worker
+CREATE TABLE IF NOT EXISTS public.exercises (
+    id UUID PRIMARY KEY,
+    external_id VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
+    primary_muscles VARCHAR(255),
+    equipment VARCHAR(255),
+    image_url TEXT,
+    video_url TEXT,
+    last_synced_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    source VARCHAR(255) DEFAULT 'ascendapi'
+);
