@@ -1,8 +1,9 @@
 # Build stage
 FROM maven:3.8.7-eclipse-temurin-17 AS build
 WORKDIR /app
-# Copiando tudo da pasta Fitness (onde o Docker está rodando)
-COPY . .
+# Copiando o pom.xml e a pasta src que estão na mesma pasta que o Dockerfile
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Package stage
