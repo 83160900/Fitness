@@ -24,15 +24,21 @@ public class FitnessApplication {
         String user = System.getenv("SPRING_DATASOURCE_USERNAME");
         if (user == null) user = System.getenv("PGUSER");
         if (user == null) user = System.getenv("POSTGRES_USER");
+        if (user != null) user = user.trim();
+        
+        String pass = System.getenv("SPRING_DATASOURCE_PASSWORD");
+        if (pass == null) pass = System.getenv("PGPASSWORD");
+        if (pass == null) pass = System.getenv("POSTGRES_PASSWORD");
+        if (pass != null) pass = pass.trim();
         
         System.out.println("[DEBUG_LOG] Iniciando aplicacao...");
         if (dbUrl != null) {
             System.out.println("[DEBUG_LOG] Tentando conectar ao banco: " + dbUrl.split("\\?")[0]);
             if (user != null) {
-                System.out.println("[DEBUG_LOG] Usuario detectado: '" + user + "' (tamanho: " + user.length() + ")");
-                if (user.endsWith(" ")) {
-                    System.out.println("[DEBUG_LOG] AVISO: O usuario possui um espaco em branco no final!");
-                }
+                System.out.println("[DEBUG_LOG] Usuario detectado: '" + user + "'");
+            }
+            if (pass != null) {
+                System.out.println("[DEBUG_LOG] Senha detectada (primeiros 2 chars): " + (pass.length() > 2 ? pass.substring(0, 2) : "**"));
             }
         } else {
             System.out.println("[DEBUG_LOG] Nenhuma variavel de banco detectada, usando padrao de application.properties");
