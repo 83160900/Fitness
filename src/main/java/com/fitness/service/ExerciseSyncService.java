@@ -24,7 +24,7 @@ public class ExerciseSyncService {
         this.repository = repository;
     }
 
-    // Sincroniza a cada 6 horas por padrÃ£o (pode ser ajustado via env: exercises.sync.fixedDelay)
+    // Sincroniza a cada 6 horas por padrÃƒÂ£o (pode ser ajustado via env: exercises.sync.fixedDelay)
     @Scheduled(fixedDelayString = "${exercises.sync.fixedDelay:21600000}")
     public void scheduledSync() {
         try {
@@ -36,7 +36,7 @@ public class ExerciseSyncService {
 
     @Async
     public void seedCommonBatches() {
-        // Conjuntos comuns (pouco volume por rodada para nÃ£o estourar limite)
+        // Conjuntos comuns (pouco volume por rodada para nÃƒÂ£o estourar limite)
         List<String> muscles = List.of("chest", "back", "legs", "shoulders", "biceps", "triceps", "core");
         int pageSize = 25;
         for (String m : muscles) {
@@ -97,10 +97,10 @@ public class ExerciseSyncService {
             entity.setEquipment(equipment);
             entity.setImageUrl(imageUrl);
             entity.setVideoUrl(videoUrl);
-            entity.setLastSyncedAt(java.time.LocalDateTime.now());
+            entity.setLastSyncedAt(java.time.Instant.now());
             
             Exercise saved = repository.save(entity);
-            log.debug("[SYNC] Exercício salvo/atualizado: {} (ID: {})", name, externalId);
+            log.debug("[SYNC] ExercÃ­cio salvo/atualizado: {} (ID: {})", name, externalId);
             return saved;
         } catch (Exception e) {
             log.error("[SYNC] Erro no upsert: {}", e.getMessage());
