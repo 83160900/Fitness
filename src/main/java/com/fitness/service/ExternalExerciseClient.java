@@ -37,9 +37,15 @@ public class ExternalExerciseClient {
             String envKey = System.getenv("RAPIDAPI_KEY");
             if (envKey != null && !envKey.isBlank()) rapidApiKey = envKey;
         }
+        
+        System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
-            throw new IllegalStateException("RapidAPI key não configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
+            throw new IllegalStateException("RapidAPI key nÃ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
+
+        String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
+        System.out.println("[DEBUG_LOG] API: Usando chave iniciando em: " + keyPrefix + "****");
 
         StringBuilder url = new StringBuilder(baseUrl).append("/exercises");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -60,9 +66,23 @@ public class ExternalExerciseClient {
         headers.add("X-RapidAPI-Host", rapidApiHost);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
-        ResponseEntity<List> response = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, List.class);
-        List body = response.getBody();
-        if (body == null) return Collections.emptyList();
-        return body;
+        System.out.println("[DEBUG_LOG] API: Chamando URL: " + url.toString());
+        
+        try {
+            ResponseEntity<List> response = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, List.class);
+            List body = response.getBody();
+            if (body == null) {
+                System.out.println("[DEBUG_LOG] API: Resposta vazia (null) recebida.");
+                return Collections.emptyList();
+            }
+            System.out.println("[DEBUG_LOG] API: Sucesso! Recebidos " + body.size() + " itens.");
+            return body;
+        } catch (Exception e) {
+            System.err.println("[DEBUG_LOG] API: ERRO NA REQUISICAO - " + e.getMessage());
+            if (e instanceof org.springframework.web.client.HttpClientErrorException hcee) {
+                System.err.println("[DEBUG_LOG] API: Status Code: " + hcee.getStatusCode() + " | Body: " + hcee.getResponseBodyAsString());
+            }
+            throw e;
+        }
     }
 }
