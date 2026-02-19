@@ -1,4 +1,4 @@
-package com.fitness;
+﻿package com.fitness;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,15 +42,15 @@ public class FitnessApplication {
         
         System.out.println("[DEBUG_LOG] Iniciando aplicacao...");
         if (dbUrl != null) {
-            System.out.println("[DEBUG_LOG] Tentando conectar ao banco: " + dbUrl.split("\\?")[0]);
+            String sanitizedUrl = dbUrl.split("\\?")[0];
+            System.out.println("[DEBUG_LOG] === CONFIGURACAO DE BANCO DETECTADA ===");
+            System.out.println("[DEBUG_LOG] URL: " + sanitizedUrl);
             if (user != null) {
-                System.out.println("[DEBUG_LOG] Usuario detectado: '" + user + "'");
+                System.out.println("[DEBUG_LOG] Usuario: '" + user + "'");
             }
-            if (pass != null) {
-                System.out.println("[DEBUG_LOG] Senha detectada (primeiros 2 chars): " + (pass.length() > 2 ? pass.substring(0, 2) : "**"));
-            }
+            System.out.println("[DEBUG_LOG] =======================================");
         } else {
-            System.out.println("[DEBUG_LOG] Nenhuma variavel de banco detectada, usando padrao de application.properties");
+            System.out.println("[DEBUG_LOG] Nenhuma variavel de banco detectada, usando padrao de localhost.");
         }
         
         SpringApplication.run(FitnessApplication.class, args);
