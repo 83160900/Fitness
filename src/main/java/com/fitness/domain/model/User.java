@@ -33,9 +33,16 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String experience; // Experiência profissional
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coach_id")
-    private User coach; // O profissional que atende este aluno
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_professionals",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "professional_id")
+    )
+    private List<User> professionals; // Lista de profissionais que atendem este aluno (Personal, Nutro, etc.)
+
+    @Column(nullable = false)
+    private boolean lgpdConsent = false; // Consentimento LGPD
 
     private String photoUrl; // URL da foto do perfil
 
@@ -124,12 +131,20 @@ public class User {
         this.experience = experience;
     }
 
-    public User getCoach() {
-        return coach;
+    public List<User> getProfessionals() {
+        return professionals;
     }
 
-    public void setCoach(User coach) {
-        this.coach = coach;
+    public void setProfessionals(List<User> professionals) {
+        this.professionals = professionals;
+    }
+
+    public boolean isLgpdConsent() {
+        return lgpdConsent;
+    }
+
+    public void setLgpdConsent(boolean lgpdConsent) {
+        this.lgpdConsent = lgpdConsent;
     }
 
     public String getPhotoUrl() {
