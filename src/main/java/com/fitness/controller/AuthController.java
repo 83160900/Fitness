@@ -43,7 +43,7 @@ public class AuthController {
                     System.out.println("[DEBUG_LOG] Login: Buscando por CPF '" + onlyDigits + "'");
                     optUser = userRepository.findByCpf(onlyDigits);
                     if (optUser.isEmpty()) {
-                        System.out.println("[DEBUG_LOG] Login: CPF não encontrado, tentando por e-mail '" + cleanIdentifier + "'");
+                        System.out.println("[DEBUG_LOG] Login: CPF nÃ£o encontrado, tentando por e-mail '" + cleanIdentifier + "'");
                         optUser = userRepository.findByEmail(cleanIdentifier);
                     }
                 } else {
@@ -67,10 +67,10 @@ public class AuthController {
                                         .message("Login realizado com sucesso!")
                                         .build());
                             } else {
-                                return ResponseEntity.status(401).body("Credenciais inválidas!");
+                                return ResponseEntity.status(401).body("Credenciais invÃ¡lidas!");
                             }
                         })
-                        .orElseGet(() -> ResponseEntity.status(401).body("Credenciais inválidas!"));
+                        .orElseGet(() -> ResponseEntity.status(401).body("Credenciais invÃ¡lidas!"));
             } catch (org.springframework.dao.DataAccessException dae) {
                 System.err.println("[DEBUG_LOG] Login: ERRO DE BANCO - " + dae.getMessage());
                 String cause = dae.getMostSpecificCause() != null ? dae.getMostSpecificCause().getMessage() : dae.getMessage();
@@ -87,7 +87,7 @@ public class AuthController {
     public ResponseEntity<?> changePassword(@RequestBody com.fitness.dto.ChangePasswordRequest req) {
         try {
             if (req.getNewPassword() == null || req.getNewPassword().trim().length() < 4) {
-                return ResponseEntity.badRequest().body("Nova senha inválida");
+                return ResponseEntity.badRequest().body("Nova senha invÃ¡lida");
             }
             String identifier = req.getUser() != null ? req.getUser().trim() : (req.getEmail() != null ? req.getEmail().trim().toLowerCase() : null);
             if (identifier == null || identifier.isEmpty()) {
@@ -109,7 +109,7 @@ public class AuthController {
                     return ResponseEntity.ok("Senha alterada com sucesso");
                 }
                 return ResponseEntity.status(401).body("Senha atual incorreta");
-            }).orElseGet(() -> ResponseEntity.status(404).body("Usuário não encontrado"));
+            }).orElseGet(() -> ResponseEntity.status(404).body("UsuÃ¡rio nÃ£o encontrado"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao alterar senha: " + e.getMessage());
         }
@@ -117,19 +117,19 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        System.out.println("[DEBUG_LOG] Cadastro: InÃ­cio da tentativa para '" + request.getEmail() + "'");
+        System.out.println("[DEBUG_LOG] Cadastro: InÃƒÂ­cio da tentativa para '" + request.getEmail() + "'");
         
         try {
             if (request.getEmail() == null || request.getEmail().isBlank()) {
-                return ResponseEntity.badRequest().body("E-mail Ã© obrigatÃ³rio");
+                return ResponseEntity.badRequest().body("E-mail ÃƒÂ© obrigatÃƒÂ³rio");
             }
 
             String cleanEmail = request.getEmail().trim().toLowerCase();
-            System.out.println("[DEBUG_LOG] Cadastro: Verificando existÃªncia de '" + cleanEmail + "'");
+            System.out.println("[DEBUG_LOG] Cadastro: Verificando existÃƒÂªncia de '" + cleanEmail + "'");
             
             if (userRepository.findByEmail(cleanEmail).isPresent()) {
-                System.out.println("[DEBUG_LOG] Cadastro: E-mail '" + cleanEmail + "' jÃ¡ existe.");
-                return ResponseEntity.badRequest().body("E-mail jÃ¡ cadastrado!");
+                System.out.println("[DEBUG_LOG] Cadastro: E-mail '" + cleanEmail + "' jÃƒÂ¡ existe.");
+                return ResponseEntity.badRequest().body("E-mail jÃƒÂ¡ cadastrado!");
             }
 
             System.out.println("[DEBUG_LOG] Cadastro: Criando objeto User...");
@@ -147,9 +147,9 @@ public class AuthController {
 
             System.out.println("[DEBUG_LOG] Cadastro: Chamando userRepository.save()...");
             userRepository.save(user);
-            System.out.println("[DEBUG_LOG] Cadastro: UsuÃ¡rio '" + cleanEmail + "' salvo com sucesso no banco!");
+            System.out.println("[DEBUG_LOG] Cadastro: UsuÃƒÂ¡rio '" + cleanEmail + "' salvo com sucesso no banco!");
 
-            return ResponseEntity.ok("UsuÃ¡rio registrado com sucesso!");
+            return ResponseEntity.ok("UsuÃƒÂ¡rio registrado com sucesso!");
         } catch (org.springframework.dao.DataAccessException e) {
             System.err.println("[DEBUG_LOG] Cadastro: ERRO DE BANCO - " + e.getMessage());
             String specificCause = (e.getMostSpecificCause() != null) ? e.getMostSpecificCause().getMessage() : e.getMessage();

@@ -48,19 +48,19 @@ public class PersonalController {
     public ResponseEntity<?> createStudent(@RequestBody NewStudentRequest req) {
         try {
             if (req.getCpf() == null || req.getCpf().trim().isEmpty() || req.getEmail() == null || req.getEmail().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("CPF e e-mail são obrigatórios");
+                return ResponseEntity.badRequest().body("CPF e e-mail sÃ£o obrigatÃ³rios");
             }
             String cleanCpf = req.getCpf().replaceAll("\\D", "");
             String cleanEmail = req.getEmail().trim().toLowerCase();
 
             if (userRepository.findByCpf(cleanCpf).isPresent()) {
-                return ResponseEntity.badRequest().body("CPF já cadastrado");
+                return ResponseEntity.badRequest().body("CPF jÃ¡ cadastrado");
             }
             if (userRepository.findByEmail(cleanEmail).isPresent()) {
-                return ResponseEntity.badRequest().body("E-mail já cadastrado");
+                return ResponseEntity.badRequest().body("E-mail jÃ¡ cadastrado");
             }
 
-            // Criar aluno com senha = 4 primeiros dígitos do CPF
+            // Criar aluno com senha = 4 primeiros dÃ­gitos do CPF
             String tempPassword = cleanCpf.length() >= 4 ? cleanCpf.substring(0, 4) : cleanCpf;
             User student = new User();
             student.setName(req.getName());
@@ -85,7 +85,7 @@ public class PersonalController {
             }
 
             // Envio de e-mail (stub)
-            System.out.println("[DEBUG_LOG] Email (stub): Enviar para " + cleanEmail + " | Usuário: " + cleanCpf + " | Senha temporária: " + tempPassword);
+            System.out.println("[DEBUG_LOG] Email (stub): Enviar para " + cleanEmail + " | UsuÃ¡rio: " + cleanCpf + " | Senha temporÃ¡ria: " + tempPassword);
 
             return ResponseEntity.ok(java.util.Map.of(
                 "success", true,
