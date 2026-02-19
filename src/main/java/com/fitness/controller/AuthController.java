@@ -27,38 +27,46 @@ public class AuthController {
             
             System.out.println("[DEBUG_LOG] Login: Tentativa para '" + email + "'");
             
-            return userRepository.findByEmail(email)
-                    .map(user -> {
-                        try {
-                            String storedPassword = user.getPassword() != null ? user.getPassword().trim() : "";
-                            System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' encontrado no banco.");
-                            System.out.println("[DEBUG_LOG] Login: Role=" + user.getRole() + ", Active=" + user.isActive());
-                            
-                            if (storedPassword.equals(password)) {
-                                System.out.println("[DEBUG_LOG] Login: Senha correta para " + email);
-                                return ResponseEntity.ok(LoginResponse.builder()
-                                        .name(user.getName())
-                                        .email(user.getEmail())
-                                        .role(user.getRole())
-                                        .specialty(user.getSpecialty())
-                                        .registrationNumber(user.getRegistrationNumber())
-                                        .photoUrl(user.getPhotoUrl())
-                                        .message("Login realizado com sucesso!")
-                                        .build());
-                            } else {
-                                System.out.println("[DEBUG_LOG] Login: Senha incorreta para '" + email + "'.");
-                                return ResponseEntity.status(401).body("Credenciais inválidas!");
+            try {
+                return userRepository.findByEmail(email)
+                        .map(user -> {
+                            try {
+                                String storedPassword = user.getPassword() != null ? user.getPassword().trim() : "";
+                                System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' encontrado no banco.");
+                                System.out.println("[DEBUG_LOG] Login: Role=" + user.getRole() + ", Active=" + user.isActive());
+                                
+                                if (storedPassword.equals(password)) {
+                                    System.out.println("[DEBUG_LOG] Login: Senha correta para " + email);
+                                    return ResponseEntity.ok(LoginResponse.builder()
+                                            .name(user.getName())
+                                            .email(user.getEmail())
+                                            .role(user.getRole())
+                                            .specialty(user.getSpecialty())
+                                            .registrationNumber(user.getRegistrationNumber())
+                                            .photoUrl(user.getPhotoUrl())
+                                            .message("Login realizado com sucesso!")
+                                            .build());
+                                } else {
+                                    System.out.println("[DEBUG_LOG] Login: Senha incorreta para '" + email + "'.");
+                                    return ResponseEntity.status(401).body("Credenciais inválidas!");
+                                }
+                            } catch (Exception e) {
+                                System.err.println("[DEBUG_LOG] Login: Erro interno ao processar usuario - " + e.getMessage());
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
                             }
-                        } catch (Exception e) {
-                            System.err.println("[DEBUG_LOG] Login: Erro interno ao processar usuario - " + e.getMessage());
-                            e.printStackTrace();
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .orElseGet(() -> {
-                        System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' NAO encontrado no banco.");
-                        return ResponseEntity.status(401).body("Credenciais inválidas!");
-                    });
+                        })
+                        .orElseGet(() -> {
+                            System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' NAO encontrado no banco.");
+                            return ResponseEntity.status(401).body("Credenciais inválidas!");
+                        });
+            } catch (org.springframework.dao.DataAccessException dae) {
+                System.err.println("[DEBUG_LOG] Login: ERRO DE BANCO - " + dae.getMessage());
+                if (dae.getMostSpecificCause() != null) {
+                    System.err.println("[DEBUG_LOG] Causa Específica: " + dae.getMostSpecificCause().getMessage());
+                }
+                return ResponseEntity.status(500).body("Erro de Banco de Dados durante login: " + dae.getMostSpecificCause().getMessage());
+            }
         } catch (Exception e) {
             System.err.println("[DEBUG_LOG] Login: ERRO CRITICO - " + e.getClass().getName() + " : " + e.getMessage());
             e.printStackTrace();
