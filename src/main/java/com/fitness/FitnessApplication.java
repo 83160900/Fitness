@@ -10,11 +10,11 @@ public class FitnessApplication {
         String dbUrl = System.getenv("SPRING_DATASOURCE_URL");
         if (dbUrl == null) dbUrl = System.getenv("JDBC_DATABASE_URL");
         if (dbUrl == null) {
-            String host = System.getenv("PGHOST");
-            String port = System.getenv("PGPORT");
-            String db = System.getenv("PGDATABASE");
+            String host = System.getenv("PGHOST") != null ? System.getenv("PGHOST") : System.getenv("POSTGRES_HOST");
+            String port = System.getenv("PGPORT") != null ? System.getenv("PGPORT") : System.getenv("POSTGRES_PORT");
+            String db = System.getenv("PGDATABASE") != null ? System.getenv("PGDATABASE") : System.getenv("POSTGRES_DB");
             if (host != null) {
-                dbUrl = "jdbc:postgresql://" + host + ":" + (port != null ? port : "5432") + "/" + db;
+                dbUrl = "jdbc:postgresql://" + host + ":" + (port != null ? port : "5432") + "/" + (db != null ? db : "fitnessdb");
             }
         }
         
