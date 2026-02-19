@@ -1,14 +1,13 @@
 # Build stage
 FROM maven:3.8.7-eclipse-temurin-17 AS build
 WORKDIR /app
-# Copiando o pom.xml e a pasta src que estão na mesma pasta que o Dockerfile
-COPY pom.xml .
-COPY src ./src
+COPY . .
 RUN mvn clean package -DskipTests
 
 # Package stage
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/target/fitness-0.0.1-SNAPSHOT.jar app.jar
+# Usando curinga para encontrar o JAR independente do nome exato
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
