@@ -1,4 +1,4 @@
-﻿package com.fitness;
+package com.fitness;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
