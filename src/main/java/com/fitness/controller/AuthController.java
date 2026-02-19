@@ -36,11 +36,19 @@ public class AuthController {
 
             try {
                 java.util.Optional<User> optUser;
-                String onlyDigits = identifier.replaceAll("\\D", "");
+                String cleanIdentifier = identifier.toLowerCase().trim();
+                String onlyDigits = cleanIdentifier.replaceAll("\\D", "");
+
                 if (onlyDigits.length() == 11) {
+                    System.out.println("[DEBUG_LOG] Login: Buscando por CPF '" + onlyDigits + "'");
                     optUser = userRepository.findByCpf(onlyDigits);
+                    if (optUser.isEmpty()) {
+                        System.out.println("[DEBUG_LOG] Login: CPF não encontrado, tentando por e-mail '" + cleanIdentifier + "'");
+                        optUser = userRepository.findByEmail(cleanIdentifier);
+                    }
                 } else {
-                    optUser = userRepository.findByEmail(identifier.toLowerCase());
+                    System.out.println("[DEBUG_LOG] Login: Buscando por e-mail '" + cleanIdentifier + "'");
+                    optUser = userRepository.findByEmail(cleanIdentifier);
                 }
 
                 return optUser
