@@ -48,7 +48,7 @@ public class AuthController {
                                             .build());
                                 } else {
                                     System.out.println("[DEBUG_LOG] Login: Senha incorreta para '" + email + "'.");
-                                    return ResponseEntity.status(401).body("Credenciais inválidas!");
+                                    return ResponseEntity.status(401).body("Credenciais invÃ¡lidas!");
                                 }
                             } catch (Exception e) {
                                 System.err.println("[DEBUG_LOG] Login: Erro interno ao processar usuario - " + e.getMessage());
@@ -58,12 +58,12 @@ public class AuthController {
                         })
                         .orElseGet(() -> {
                             System.out.println("[DEBUG_LOG] Login: Usuario '" + email + "' NAO encontrado no banco.");
-                            return ResponseEntity.status(401).body("Credenciais inválidas!");
+                            return ResponseEntity.status(401).body("Credenciais invÃ¡lidas!");
                         });
             } catch (org.springframework.dao.DataAccessException dae) {
                 System.err.println("[DEBUG_LOG] Login: ERRO DE BANCO - " + dae.getMessage());
                 if (dae.getMostSpecificCause() != null) {
-                    System.err.println("[DEBUG_LOG] Causa Específica: " + dae.getMostSpecificCause().getMessage());
+                    System.err.println("[DEBUG_LOG] Causa EspecÃ­fica: " + dae.getMostSpecificCause().getMessage());
                 }
                 return ResponseEntity.status(500).body("Erro de Banco de Dados durante login: " + dae.getMostSpecificCause().getMessage());
             }
@@ -76,19 +76,19 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        System.out.println("[DEBUG_LOG] Cadastro: Início da tentativa para '" + request.getEmail() + "'");
+        System.out.println("[DEBUG_LOG] Cadastro: InÃ­cio da tentativa para '" + request.getEmail() + "'");
         
         try {
             if (request.getEmail() == null || request.getEmail().isBlank()) {
-                return ResponseEntity.badRequest().body("E-mail é obrigatório");
+                return ResponseEntity.badRequest().body("E-mail Ã© obrigatÃ³rio");
             }
 
             String cleanEmail = request.getEmail().trim().toLowerCase();
-            System.out.println("[DEBUG_LOG] Cadastro: Verificando existência de '" + cleanEmail + "'");
+            System.out.println("[DEBUG_LOG] Cadastro: Verificando existÃªncia de '" + cleanEmail + "'");
             
             if (userRepository.findByEmail(cleanEmail).isPresent()) {
-                System.out.println("[DEBUG_LOG] Cadastro: E-mail '" + cleanEmail + "' já existe.");
-                return ResponseEntity.badRequest().body("E-mail já cadastrado!");
+                System.out.println("[DEBUG_LOG] Cadastro: E-mail '" + cleanEmail + "' jÃ¡ existe.");
+                return ResponseEntity.badRequest().body("E-mail jÃ¡ cadastrado!");
             }
 
             System.out.println("[DEBUG_LOG] Cadastro: Criando objeto User...");
@@ -106,9 +106,9 @@ public class AuthController {
 
             System.out.println("[DEBUG_LOG] Cadastro: Chamando userRepository.save()...");
             userRepository.save(user);
-            System.out.println("[DEBUG_LOG] Cadastro: Usuário '" + cleanEmail + "' salvo com sucesso no banco!");
+            System.out.println("[DEBUG_LOG] Cadastro: UsuÃ¡rio '" + cleanEmail + "' salvo com sucesso no banco!");
 
-            return ResponseEntity.ok("Usuário registrado com sucesso!");
+            return ResponseEntity.ok("UsuÃ¡rio registrado com sucesso!");
         } catch (org.springframework.dao.DataAccessException e) {
             System.err.println("[DEBUG_LOG] Cadastro: ERRO DE BANCO - " + e.getMessage());
             String specificCause = (e.getMostSpecificCause() != null) ? e.getMostSpecificCause().getMessage() : e.getMessage();
