@@ -26,6 +26,16 @@ public class User {
 
     private String specialty; // Especialidade (Ex: Nutrição Esportiva, Quiropraxia Clínica)
     private String registrationNumber; // CRM, CRN, CREF, etc.
+    
+    @Column(columnDefinition = "TEXT")
+    private String formation; // Formação/Graduação
+    
+    @Column(columnDefinition = "TEXT")
+    private String experience; // Experiência profissional
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coach_id")
+    private User coach; // O profissional que atende este aluno
 
     private boolean active = true;
 
@@ -94,6 +104,30 @@ public class User {
 
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
+    }
+
+    public String getFormation() {
+        return formation;
+    }
+
+    public void setFormation(String formation) {
+        this.formation = formation;
+    }
+
+    public String getExperience() {
+        return experience;
+    }
+
+    public void setExperience(String experience) {
+        this.experience = experience;
+    }
+
+    public User getCoach() {
+        return coach;
+    }
+
+    public void setCoach(User coach) {
+        this.coach = coach;
     }
 
     public boolean isActive() {
