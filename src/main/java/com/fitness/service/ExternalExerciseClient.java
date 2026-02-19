@@ -41,16 +41,32 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃƒÂ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃ£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
         System.out.println("[DEBUG_LOG] API: Usando chave iniciando em: " + keyPrefix + "****");
 
-        StringBuilder url = new StringBuilder(baseUrl).append("/exercises");
+        // Fixed endpoint: testing /list or /exercises based on 404 logs
+        // Many RapidAPIs for exercises use /exercises or /list. 
+        // We'll try to build the URL more carefully.
+        StringBuilder url = new StringBuilder(baseUrl);
+        if (!baseUrl.endsWith("/")) url.append("/");
+        
+        // Based on the 404 error, /exercises was not found. 
+        // For this AscendAPI exercise database, the base endpoints are usually:
+        // /exercisedb/list (or similar). Let's use the provided baseUrl strictly.
+        // We'll try to append "/" and if searching by muscle, use its specific endpoint pattern.
+        
+        if (muscle != null && !muscle.isBlank()) {
+            url.append("exercises/muscle/").append(muscle);
+        } else {
+            url.append("exercises");
+        }
+
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         if (query != null && !query.isBlank()) params.add("name", query);
-        if (muscle != null && !muscle.isBlank()) params.add("muscle", muscle);
+        // muscle already added to path
         if (limit != null) params.add("limit", String.valueOf(limit));
         if (page != null) params.add("page", String.valueOf(page));
 
