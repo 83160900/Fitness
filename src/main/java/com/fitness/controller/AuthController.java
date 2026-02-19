@@ -32,6 +32,8 @@ public class AuthController {
                                 .name(user.getName())
                                 .email(user.getEmail())
                                 .role(user.getRole())
+                                .specialty(user.getSpecialty())
+                                .registrationNumber(user.getRegistrationNumber())
                                 .message("Login realizado com sucesso!")
                                 .build());
                     } else {

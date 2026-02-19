@@ -6,6 +6,8 @@ public class LoginResponse {
     private String name;
     private String email;
     private UserRole role;
+    private String specialty;
+    private String registrationNumber;
     private String message;
 
     public LoginResponse() {}
@@ -53,10 +55,28 @@ public class LoginResponse {
         this.message = message;
     }
 
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
     public static class Builder {
         private String name;
         private String email;
         private UserRole role;
+        private String specialty;
+        private String registrationNumber;
         private String message;
 
         public Builder name(String name) {
@@ -74,13 +94,26 @@ public class LoginResponse {
             return this;
         }
 
+        public Builder specialty(String specialty) {
+            this.specialty = specialty;
+            return this;
+        }
+
+        public Builder registrationNumber(String registrationNumber) {
+            this.registrationNumber = registrationNumber;
+            return this;
+        }
+
         public Builder message(String message) {
             this.message = message;
             return this;
         }
 
         public LoginResponse build() {
-            return new LoginResponse(name, email, role, message);
+            LoginResponse response = new LoginResponse(name, email, role, message);
+            response.setSpecialty(this.specialty);
+            response.setRegistrationNumber(this.registrationNumber);
+            return response;
         }
     }
 }

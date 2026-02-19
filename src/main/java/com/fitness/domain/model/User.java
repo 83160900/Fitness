@@ -24,6 +24,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    private String specialty; // Especialidade (Ex: Nutrição Esportiva, Quiropraxia Clínica)
+    private String registrationNumber; // CRM, CRN, CREF, etc.
+
     private boolean active = true;
 
     public User() {}
@@ -75,6 +78,22 @@ public class User {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
     }
 
     public boolean isActive() {
