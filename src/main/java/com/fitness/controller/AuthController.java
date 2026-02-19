@@ -33,6 +33,7 @@ public class AuthController {
                                 .role(user.getRole())
                                 .specialty(user.getSpecialty())
                                 .registrationNumber(user.getRegistrationNumber())
+                                .photoUrl(user.getPhotoUrl())
                                 .message("Login realizado com sucesso!")
                                 .build());
                     } else {

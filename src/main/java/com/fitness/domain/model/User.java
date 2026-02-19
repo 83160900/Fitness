@@ -37,6 +37,8 @@ public class User {
     @JoinColumn(name = "coach_id")
     private User coach; // O profissional que atende este aluno
 
+    private String photoUrl; // URL da foto do perfil
+
     private boolean active = true;
 
     public User() {}
@@ -128,6 +130,14 @@ public class User {
 
     public void setCoach(User coach) {
         this.coach = coach;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public boolean isActive() {

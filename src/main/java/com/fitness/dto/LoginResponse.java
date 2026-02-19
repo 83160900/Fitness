@@ -8,6 +8,7 @@ public class LoginResponse {
     private UserRole role;
     private String specialty;
     private String registrationNumber;
+    private String photoUrl;
     private String message;
 
     public LoginResponse() {}
@@ -71,12 +72,21 @@ public class LoginResponse {
         this.registrationNumber = registrationNumber;
     }
 
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
     public static class Builder {
         private String name;
         private String email;
         private UserRole role;
         private String specialty;
         private String registrationNumber;
+        private String photoUrl;
         private String message;
 
         public Builder name(String name) {
@@ -104,6 +114,11 @@ public class LoginResponse {
             return this;
         }
 
+        public Builder photoUrl(String photoUrl) {
+            this.photoUrl = photoUrl;
+            return this;
+        }
+
         public Builder message(String message) {
             this.message = message;
             return this;
@@ -113,6 +128,7 @@ public class LoginResponse {
             LoginResponse response = new LoginResponse(name, email, role, message);
             response.setSpecialty(this.specialty);
             response.setRegistrationNumber(this.registrationNumber);
+            response.setPhotoUrl(this.photoUrl);
             return response;
         }
     }

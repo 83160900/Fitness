@@ -1,0 +1,11 @@
+com\fitness\controller\AuthController.class
+com\fitness\dto\LoginResponse$Builder.class
+com\fitness\config\CorsConfig$1.class
+com\fitness\FitnessApplication.class
+com\fitness\dto\LoginRequest.class
+com\fitness\repository\UserRepository.class
+com\fitness\controller\HealthCheckController.class
+com\fitness\config\CorsConfig.class
+com\fitness\domain\model\User.class
+com\fitness\domain\enums\UserRole.class
+com\fitness\dto\LoginResponse.class
