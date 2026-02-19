@@ -4,6 +4,7 @@ import com.fitness.domain.model.Exercise;
 import com.fitness.repository.ExerciseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class ExerciseSyncService {
         this.repository = repository;
     }
 
-    // Sincroniza a cada 6 horas por padrão (pode ser ajustado via env: exercises.sync.fixedDelay)
+    // Sincroniza a cada 6 horas por padrÃ£o (pode ser ajustado via env: exercises.sync.fixedDelay)
     @Scheduled(fixedDelayString = "${exercises.sync.fixedDelay:21600000}")
     public void scheduledSync() {
         try {
@@ -33,8 +34,9 @@ public class ExerciseSyncService {
         }
     }
 
+    @Async
     public void seedCommonBatches() {
-        // Conjuntos comuns (pouco volume por rodada para não estourar limite)
+        // Conjuntos comuns (pouco volume por rodada para nÃ£o estourar limite)
         List<String> muscles = List.of("chest", "back", "legs", "shoulders", "biceps", "triceps", "core");
         int pageSize = 25;
         for (String m : muscles) {
