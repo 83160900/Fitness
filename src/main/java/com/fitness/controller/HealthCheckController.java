@@ -10,6 +10,7 @@ public class HealthCheckController {
 
     @GetMapping("/")
     public Map<String, String> health() {
+        System.out.println("[DEBUG_LOG] Health check accessed");
         return Map.of(
             "status", "Online",
             "plataforma", "Fitness",
