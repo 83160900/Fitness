@@ -8,9 +8,9 @@ ENV MAVEN_OPTS="-Dfile.encoding=UTF-8"
 COPY pom.xml .
 RUN mvn dependency:go-offline -B -Dmaven.wagon.http.retryHandler.count=3 -Dhttps.protocols=TLSv1.2
 
-# Copia o código fonte e compila
+# Copia o código fonte e compila (DEBUG MODE ATIVADO: -X -e)
 COPY src ./src
-RUN mvn clean package -DskipTests -B -Dmaven.wagon.http.retryHandler.count=3 -Dhttps.protocols=TLSv1.2 -Dfile.encoding=UTF-8
+RUN mvn clean package -DskipTests -B -e -X -Dmaven.wagon.http.retryHandler.count=3 -Dhttps.protocols=TLSv1.2 -Dfile.encoding=UTF-8
 
 # Etapa final (JRE)
 FROM eclipse-temurin:17-jre
