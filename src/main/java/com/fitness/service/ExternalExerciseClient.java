@@ -41,7 +41,7 @@ public class ExternalExerciseClient {
         System.out.println("[DEBUG_LOG] API: Tentando busca de exercicios...");
         if (rapidApiKey == null || rapidApiKey.isBlank()) {
             System.err.println("[DEBUG_LOG] API: ERRO - RAPIDAPI_KEY nao encontrada no sistema.");
-            throw new IllegalStateException("RapidAPI key nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
+            throw new IllegalStateException("RapidAPI key nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o configurada. Defina 'rapidapi.key' ou a env 'RAPIDAPI_KEY'.");
         }
 
         String keyPrefix = rapidApiKey.length() > 4 ? rapidApiKey.substring(0, 4) : "***";
@@ -54,28 +54,15 @@ public class ExternalExerciseClient {
         if (!baseUrl.endsWith("/")) url.append("/");
         
         // For AscendAPI (edb-with-videos-and-images-by-ascendapi):
-        // If /exercises/target/ pectorals gave 404, it's possible the prefix is different.
-        // Some variants of this API use /exercise/target/ (singular) or just /target/
+        // According to documentation for this specific API, the endpoints are:
+        // /list, /muscle/{muscle}, /name/{name}, /equipment/{equipment}
         
-        // Let's try the pattern: /exercise/target/{target} or /exercise/bodyPart/{bodyPart}
         if (muscle != null && !muscle.isBlank()) {
             String normMuscle = muscle.toLowerCase().trim();
-            String pathPart = "";
-            if (normMuscle.equals("chest")) pathPart = "target/pectorals";
-            else if (normMuscle.equals("back")) pathPart = "target/lats";
-            else if (normMuscle.equals("legs")) pathPart = "bodyPart/upper%20legs";
-            else if (normMuscle.equals("abs") || normMuscle.equals("core")) pathPart = "bodyPart/waist";
-            else if (normMuscle.equals("shoulders")) pathPart = "target/delts";
-            else if (normMuscle.equals("biceps")) pathPart = "target/biceps";
-            else if (normMuscle.equals("triceps")) pathPart = "target/triceps";
-            
-            if (!pathPart.isEmpty()) {
-                url.append("exercise/").append(pathPart); // singular 'exercise'
-            } else {
-                url.append("exercises");
-            }
+            // This API uses /muscle/{muscle} directly
+            url.append("muscle/").append(normMuscle);
         } else {
-            url.append("exercises");
+            url.append("list");
         }
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
