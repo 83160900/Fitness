@@ -19,4 +19,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
     List<Exercise> search(@Param("q") String q,
                           @Param("muscle") String muscle,
                           @Param("equipment") String equipment);
+
+    @Query("select max(e.lastSyncedAt) from Exercise e")
+    Optional<java.time.Instant> findLastSyncTimestamp();
 }

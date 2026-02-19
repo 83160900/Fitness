@@ -54,4 +54,16 @@ public class ExerciseController {
             ));
         }
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> getStatus() {
+        long total = repository.count();
+        java.time.Instant lastSync = repository.findLastSyncTimestamp().orElse(null);
+        return ResponseEntity.ok(Map.of(
+            "total_exercicios_baixados", total,
+            "ultima_sincronizacao", lastSync != null ? lastSync.toString() : "Nenhuma",
+            "mensagem", total > 0 ? "Sincronizacao em andamento ou concluida." : "Nenhum exercicio no banco ainda. Verifique se a RAPIDAPI_KEY esta correta.",
+            "timestamp_atual", java.time.Instant.now().toString()
+        ));
+    }
 }
