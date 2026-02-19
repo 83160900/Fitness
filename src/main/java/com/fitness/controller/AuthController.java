@@ -111,13 +111,14 @@ public class AuthController {
             return ResponseEntity.ok("Usuário registrado com sucesso!");
         } catch (org.springframework.dao.DataAccessException e) {
             System.err.println("[DEBUG_LOG] Cadastro: ERRO DE BANCO - " + e.getMessage());
-            return ResponseEntity.status(500).body("Erro de Banco de Dados: " + e.getMostSpecificCause().getMessage());
+            String specificCause = (e.getMostSpecificCause() != null) ? e.getMostSpecificCause().getMessage() : e.getMessage();
+            return ResponseEntity.status(500).body("Erro de Banco de Dados (Cadastro): " + specificCause);
         } catch (Exception e) {
             System.err.println("[DEBUG_LOG] Cadastro: ERRO DESCONHECIDO - " + e.getClass().getName() + " : " + e.getMessage());
             e.printStackTrace();
             String msg = e.getMessage();
             if (e.getCause() != null) msg += " | Causa: " + e.getCause().getMessage();
-            return ResponseEntity.status(500).body("Erro Interno: " + msg);
+            return ResponseEntity.status(500).body("Erro Interno (Cadastro): " + msg);
         }
     }
 }
