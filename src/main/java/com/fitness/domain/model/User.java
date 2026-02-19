@@ -4,6 +4,7 @@ import com.fitness.domain.enums.UserRole;
 import jakarta.persistence.*;
 
 import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
