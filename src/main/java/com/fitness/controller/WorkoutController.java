@@ -38,4 +38,13 @@ public class WorkoutController {
     public ResponseEntity<List<WorkoutPlan>> getByCoach(@PathVariable String email) {
         return ResponseEntity.ok(workoutService.getWorkoutsByCoach(email));
     }
+
+    @PostMapping("/{planId}/link")
+    public ResponseEntity<?> linkToStudent(@PathVariable java.util.UUID planId, @RequestParam String studentEmail) {
+        try {
+            return ResponseEntity.ok(workoutService.linkExistingPlanToStudent(planId, studentEmail));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao vincular treino: " + e.getMessage());
+        }
+    }
 }

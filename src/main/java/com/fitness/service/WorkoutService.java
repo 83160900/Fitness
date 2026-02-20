@@ -44,6 +44,7 @@ public class WorkoutService {
         plan.setCoach(coach);
         plan.setStudent(student);
         plan.setItems(new ArrayList<>());
+        plan.setCreatedAt(java.time.Instant.now());
 
         for (WorkoutPlanRequest.WorkoutExerciseRequest itemReq : request.getExercises()) {
             Exercise exercise = exerciseRepository.findById(itemReq.getExerciseId())
@@ -61,6 +62,37 @@ public class WorkoutService {
         }
 
         return workoutPlanRepository.save(plan);
+    }
+
+    @Transactional
+    public WorkoutPlan linkExistingPlanToStudent(java.util.UUID planId, String studentEmail) {
+        WorkoutPlan sourcePlan = workoutPlanRepository.findById(planId)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
+        
+        User student = userRepository.findByEmail(studentEmail.trim().toLowerCase())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        WorkoutPlan newPlan = new WorkoutPlan();
+        newPlan.setName(sourcePlan.getName());
+        newPlan.setDescription(sourcePlan.getDescription());
+        newPlan.setCoach(sourcePlan.getCoach());
+        newPlan.setStudent(student);
+        newPlan.setCreatedAt(java.time.Instant.now());
+        newPlan.setItems(new ArrayList<>());
+
+        for (WorkoutExercise sourceItem : sourcePlan.getItems()) {
+            WorkoutExercise newItem = new WorkoutExercise();
+            newItem.setWorkoutPlan(newPlan);
+            newItem.setExercise(sourceItem.getExercise());
+            newItem.setSets(sourceItem.getSets());
+            newItem.setReps(sourceItem.getReps());
+            newItem.setRestTime(sourceItem.getRestTime());
+            newItem.setExerciseOrder(sourceItem.getExerciseOrder());
+            newItem.setObservations(sourceItem.getObservations());
+            newPlan.getItems().add(newItem);
+        }
+
+        return workoutPlanRepository.save(newPlan);
     }
 
     public List<WorkoutPlan> getWorkoutsByStudent(String email) {
