@@ -45,6 +45,7 @@ public class WorkoutService {
         plan.setStudent(student);
         plan.setItems(new ArrayList<>());
         plan.setCreatedAt(java.time.Instant.now());
+        plan.setActive(true);
 
         for (WorkoutPlanRequest.WorkoutExerciseRequest itemReq : request.getExercises()) {
             Exercise exercise = exerciseRepository.findById(itemReq.getExerciseId())
@@ -78,6 +79,7 @@ public class WorkoutService {
         newPlan.setCoach(sourcePlan.getCoach());
         newPlan.setStudent(student);
         newPlan.setCreatedAt(java.time.Instant.now());
+        newPlan.setActive(true);
         newPlan.setItems(new ArrayList<>());
 
         for (WorkoutExercise sourceItem : sourcePlan.getItems()) {

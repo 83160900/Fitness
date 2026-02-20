@@ -22,21 +22,31 @@ public class WorkoutController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody WorkoutPlanRequest request) {
         try {
+            System.out.println("[DEBUG_LOG] Recebendo requisição de novo treino: " + request.getName());
+            System.out.println("[DEBUG_LOG] Coach: " + request.getCoachEmail() + ", Student: " + request.getStudentEmail());
             WorkoutPlan plan = workoutService.createWorkoutPlan(request);
             return ResponseEntity.ok(plan);
         } catch (Exception e) {
+            System.err.println("[DEBUG_LOG] Erro ao criar treino: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Erro ao criar treino: " + e.getMessage());
         }
     }
 
     @GetMapping("/student/{email}")
     public ResponseEntity<List<WorkoutPlan>> getByStudent(@PathVariable String email) {
-        return ResponseEntity.ok(workoutService.getWorkoutsByStudent(email));
+        System.out.println("[DEBUG_LOG] Buscando treinos para o aluno: " + email);
+        List<WorkoutPlan> workouts = workoutService.getWorkoutsByStudent(email);
+        System.out.println("[DEBUG_LOG] Encontrados " + workouts.size() + " treinos ativos para o aluno.");
+        return ResponseEntity.ok(workouts);
     }
 
     @GetMapping("/coach/{email}")
     public ResponseEntity<List<WorkoutPlan>> getByCoach(@PathVariable String email) {
-        return ResponseEntity.ok(workoutService.getWorkoutsByCoach(email));
+        System.out.println("[DEBUG_LOG] Buscando treinos (Biblioteca) para o coach: " + email);
+        List<WorkoutPlan> workouts = workoutService.getWorkoutsByCoach(email);
+        System.out.println("[DEBUG_LOG] Encontrados " + workouts.size() + " treinos na biblioteca.");
+        return ResponseEntity.ok(workouts);
     }
 
     @PostMapping("/{planId}/link")
