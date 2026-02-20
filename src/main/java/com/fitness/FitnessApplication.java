@@ -1,4 +1,4 @@
-package com.fitness;
+﻿package com.fitness;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -42,6 +42,12 @@ public class FitnessApplication {
                         "lean_mass DOUBLE PRECISION, muscle_mass DOUBLE PRECISION, visceral_fat DOUBLE PRECISION, " +
                         "body_water DOUBLE PRECISION, metabolic_age INTEGER, " +
                         "waist DOUBLE PRECISION, hip DOUBLE PRECISION, arm DOUBLE PRECISION, thigh DOUBLE PRECISION)");
+
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS public.schedule_slots (" +
+                        "id UUID PRIMARY KEY, personal_email VARCHAR(255) NOT NULL, student_email VARCHAR(255), " +
+                        "start_time TIMESTAMP NOT NULL, status VARCHAR(50) NOT NULL, " +
+                        "recurrence VARCHAR(50), rejection_reason TEXT, locked_until TIMESTAMP, " +
+                        "UNIQUE(personal_email, start_time))");
 
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS public.exercises (" +
                         "id UUID PRIMARY KEY, external_id VARCHAR(255), name VARCHAR(255) NOT NULL, " +
