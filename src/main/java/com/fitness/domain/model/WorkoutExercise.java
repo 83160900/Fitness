@@ -1,5 +1,6 @@
 package com.fitness.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public class WorkoutExercise {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_plan_id", nullable = false)
     private WorkoutPlan workoutPlan;

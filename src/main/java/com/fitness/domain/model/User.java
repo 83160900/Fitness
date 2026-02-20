@@ -1,6 +1,8 @@
 package com.fitness.domain.model;
 
 import com.fitness.domain.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -8,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "professionals"})
 public class User {
 
     @Id
