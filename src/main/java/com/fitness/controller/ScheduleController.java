@@ -3,6 +3,7 @@ package com.fitness.controller;
 import com.fitness.domain.model.ScheduleSlot;
 import com.fitness.repository.ScheduleRepository;
 import com.fitness.dto.ScheduleRequest;
+import com.fitness.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +17,11 @@ import java.util.Optional;
 public class ScheduleController {
 
     private final ScheduleRepository repository;
+    private final NotificationService notificationService;
 
-    public ScheduleController(ScheduleRepository repository) {
+    public ScheduleController(ScheduleRepository repository, NotificationService notificationService) {
         this.repository = repository;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/personal/{email}")
@@ -48,7 +51,9 @@ public class ScheduleController {
             slot.setRecurrence(recurrence != null ? recurrence : "NENHUMA");
             slot.setLockedUntil(LocalDateTime.now().plusMinutes(5));
             
-            return ResponseEntity.ok(repository.save(slot));
+            ScheduleSlot saved = repository.save(slot);
+            notificationService.notifyReservationCreated(saved);
+            return ResponseEntity.ok(saved);
         }
     }
 
@@ -62,6 +67,9 @@ public class ScheduleController {
         ScheduleSlot slot = opt.get();
         if (req.isConfirm()) {
             slot.setStatus("CONFIRMADO");
+            ScheduleSlot saved = repository.save(slot);
+            notificationService.notifyReservationConfirmed(saved);
+            return ResponseEntity.ok(saved);
         } else {
             slot.setStatus("CANCELADO");
             slot.setRejectionReason(req.getReason());

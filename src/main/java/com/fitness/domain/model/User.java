@@ -54,6 +54,8 @@ public class User {
 
     private String address; // Endereço do aluno
 
+    private String phone; // WhatsApp
+
     @Column(nullable = false)
     private boolean forcePasswordChange = false; // Forçar troca de senha no primeiro login
 
@@ -185,6 +187,14 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public boolean isForcePasswordChange() {
