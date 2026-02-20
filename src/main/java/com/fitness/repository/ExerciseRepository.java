@@ -13,9 +13,9 @@ public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
 
     Optional<Exercise> findByExternalId(String externalId);
 
-    @Query("select e from Exercise e where (:q is null or lower(e.name) like lower(concat('%', :q, '%'))) " +
-            "and (:muscle is null or lower(e.primaryMuscles) like lower(concat('%', :muscle, '%'))) " +
-            "and (:equipment is null or lower(e.equipment) like lower(concat('%', :equipment, '%'))) ")
+    @Query("select e from Exercise e where (:q is null or lower(e.name) like lower(concat('%', cast(:q as string), '%'))) " +
+            "and (:muscle is null or lower(e.primaryMuscles) like lower(concat('%', cast(:muscle as string), '%'))) " +
+            "and (:equipment is null or lower(e.equipment) like lower(concat('%', cast(:equipment as string), '%'))) ")
     List<Exercise> search(@Param("q") String q,
                           @Param("muscle") String muscle,
                           @Param("equipment") String equipment);
