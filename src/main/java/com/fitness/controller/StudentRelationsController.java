@@ -26,13 +26,18 @@ public class StudentRelationsController {
         Optional<User> opt = userRepository.findByEmail(email.trim().toLowerCase());
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         User student = opt.get();
-        List<Map<String, Object>> pros = student.getProfessionals() == null ? List.of() : student.getProfessionals().stream()
+        List<Map<String, String>> pros;
+        if (student.getProfessionals() == null) {
+            pros = List.of();
+        } else {
+            pros = student.getProfessionals().stream()
                 .map(p -> Map.of(
-                        "name", p.getName(),
-                        "email", p.getEmail(),
-                        "phone", p.getPhone(),
-                        "photoUrl", p.getPhotoUrl()
+                        "name", p.getName() != null ? p.getName() : "",
+                        "email", p.getEmail() != null ? p.getEmail() : "",
+                        "phone", p.getPhone() != null ? p.getPhone() : "",
+                        "photoUrl", p.getPhotoUrl() != null ? p.getPhotoUrl() : ""
                 )).collect(Collectors.toList());
+        }
         return ResponseEntity.ok(pros);
     }
 }
