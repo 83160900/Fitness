@@ -115,4 +115,37 @@ public class NotificationService {
             }
         });
     }
+
+    public void notifyReservationMoved(ScheduleSlot slot, java.time.LocalDateTime oldTime) {
+        Notification notification = new Notification();
+        notification.setType("MUDANCA");
+        notification.setSenderEmail(slot.getPersonalEmail());
+        notification.setRecipientEmail(slot.getStudentEmail());
+        notification.setSlotId(slot.getId());
+        notification.setTitle("Horário Alterado");
+
+        String oldDateStr = oldTime.format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
+        String newDateStr = slot.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
+        
+        notification.setMessage("Sua aula de " + oldDateStr + " foi movida pelo Personal para " + newDateStr + ".");
+        notification.setStatus("PENDENTE");
+
+        notificationRepository.save(notification);
+
+        // Enviar WhatsApp para o Aluno
+        Optional<User> studentOpt = userRepository.findByEmail(slot.getStudentEmail());
+        studentOpt.ifPresent(student -> {
+            if (student.getPhone() != null && !student.getPhone().isEmpty()) {
+                try {
+                    String waMessage = "Olá " + student.getName() + ", seu horário de aula foi alterado pelo Personal.\n" +
+                            "De: " + oldDateStr + "\nPara: " + newDateStr;
+                    whatsappService.sendMessage(student.getPhone(), waMessage);
+                    notification.setSentToWhatsApp(true);
+                } catch (Exception e) {
+                    notification.setWhatsappError(e.getMessage());
+                }
+                notificationRepository.save(notification);
+            }
+        });
+    }
 }

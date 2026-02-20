@@ -94,4 +94,33 @@ public class ScheduleController {
         slot.setStatus("CANCELADO");
         return ResponseEntity.ok(repository.save(slot));
     }
+    @PostMapping("/move")
+    public ResponseEntity<?> moveSlot(@RequestBody ScheduleRequest req) {
+        if (req.getSlotId() == null || req.getStartTime() == null) {
+            return ResponseEntity.badRequest().body("SlotId e novo horário são obrigatórios");
+        }
+        
+        Optional<ScheduleSlot> opt = repository.findById(req.getSlotId());
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        ScheduleSlot slot = opt.get();
+        LocalDateTime oldTime = slot.getStartTime();
+        LocalDateTime newTime = req.getStartTime();
+
+        // Verifica se o novo horário está livre
+        Optional<ScheduleSlot> target = repository.findByPersonalEmailAndStartTime(slot.getPersonalEmail(), newTime);
+        if (target.isPresent() && !target.get().getStatus().equals("CANCELADO")) {
+            return ResponseEntity.badRequest().body("O novo horário já está ocupado.");
+        }
+
+        // Move o slot para o novo horário
+        slot.setStartTime(newTime);
+        // O status permanece o mesmo (CONFIRMADO/RESERVADO)
+        ScheduleSlot saved = repository.save(slot);
+
+        // Opcional: Notificar o aluno sobre a mudança
+        notificationService.notifyReservationMoved(saved, oldTime);
+
+        return ResponseEntity.ok(saved);
+    }
 }
