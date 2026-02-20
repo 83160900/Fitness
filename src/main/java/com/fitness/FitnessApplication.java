@@ -1,4 +1,4 @@
-package com.fitness;
+﻿package com.fitness;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,11 +31,18 @@ public class FitnessApplication {
                         "formation TEXT, experience TEXT, photo_url VARCHAR(1024), " +
                         "lgpd_consent BOOLEAN NOT NULL DEFAULT FALSE, active BOOLEAN NOT NULL DEFAULT TRUE)");
 
-                // Evolução de schema: acrescentar colunas novas de forma idempotente
+                // EvoluÃ§Ã£o de schema: acrescentar colunas novas de forma idempotente
                 jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS cpf VARCHAR(255) UNIQUE");
                 jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS address VARCHAR(255)");
                 jdbcTemplate.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS force_password_change BOOLEAN NOT NULL DEFAULT FALSE");
                 
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS public.bioimpedance (" +
+                        "id UUID PRIMARY KEY, student_email VARCHAR(255) NOT NULL, date TIMESTAMP NOT NULL, " +
+                        "weight DOUBLE PRECISION, imc DOUBLE PRECISION, fat_percent DOUBLE PRECISION, " +
+                        "lean_mass DOUBLE PRECISION, muscle_mass DOUBLE PRECISION, visceral_fat DOUBLE PRECISION, " +
+                        "body_water DOUBLE PRECISION, metabolic_age INTEGER, " +
+                        "waist DOUBLE PRECISION, hip DOUBLE PRECISION, arm DOUBLE PRECISION, thigh DOUBLE PRECISION)");
+
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS public.exercises (" +
                         "id UUID PRIMARY KEY, external_id VARCHAR(255), name VARCHAR(255) NOT NULL, " +
                         "primary_muscles VARCHAR(255), equipment VARCHAR(255), " +
