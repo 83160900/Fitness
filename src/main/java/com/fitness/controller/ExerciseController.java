@@ -66,4 +66,21 @@ public class ExerciseController {
             "timestamp_atual", java.time.Instant.now().toString()
         ));
     }
+
+    @PostMapping("/ensure")
+    public ResponseEntity<?> ensureExercises(@RequestBody List<Map<String, String>> exercises) {
+        for (Map<String, String> exData : exercises) {
+            String name = exData.get("name");
+            if (name == null || name.isEmpty()) continue;
+            
+            if (repository.findByNameIgnoreCase(name).isEmpty()) {
+                Exercise ex = new Exercise();
+                ex.setName(name);
+                ex.setPrimaryMuscles(exData.getOrDefault("category", "Geral"));
+                ex.setSource("manual_seed");
+                repository.save(ex);
+            }
+        }
+        return ResponseEntity.ok(Map.of("message", "Exercícios garantidos no banco"));
+    }
 }

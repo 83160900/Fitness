@@ -22,4 +22,6 @@ public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
 
     @Query("select max(e.lastSyncedAt) from Exercise e")
     Optional<java.time.Instant> findLastSyncTimestamp();
+
+    Optional<Exercise> findByNameIgnoreCase(String name);
 }
