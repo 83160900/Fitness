@@ -37,7 +37,7 @@ public class ScheduleController {
         synchronized (this) {
             Optional<ScheduleSlot> existing = repository.findByPersonalEmailAndStartTime(personalEmail, startTime);
             if (existing.isPresent() && !existing.get().getStatus().equals("CANCELADO")) {
-                return ResponseEntity.badRequest().body("Horário já ocupado ou reservado.");
+                return ResponseEntity.badRequest().body("HorÃ¡rio jÃ¡ ocupado ou reservado.");
             }
 
             ScheduleSlot slot = existing.orElse(new ScheduleSlot());
@@ -54,7 +54,7 @@ public class ScheduleController {
 
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmSlot(@RequestBody ScheduleRequest req) {
-        if (req.getSlotId() == null) return ResponseEntity.badRequest().body("SlotId obrigatório");
+        if (req.getSlotId() == null) return ResponseEntity.badRequest().body("SlotId obrigatÃ³rio");
         
         Optional<ScheduleSlot> opt = repository.findById(req.getSlotId());
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
@@ -71,14 +71,14 @@ public class ScheduleController {
 
     @PostMapping("/cancel")
     public ResponseEntity<?> cancelSlot(@RequestBody ScheduleRequest req) {
-        if (req.getSlotId() == null) return ResponseEntity.badRequest().body("SlotId obrigatório");
+        if (req.getSlotId() == null) return ResponseEntity.badRequest().body("SlotId obrigatÃ³rio");
         
         Optional<ScheduleSlot> opt = repository.findById(req.getSlotId());
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         ScheduleSlot slot = opt.get();
         if (slot.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
-            return ResponseEntity.badRequest().body("Cancelamento permitido apenas com 24h de antecedência.");
+            return ResponseEntity.badRequest().body("Cancelamento permitido apenas com 24h de antecedÃªncia.");
         }
 
         slot.setStatus("CANCELADO");
