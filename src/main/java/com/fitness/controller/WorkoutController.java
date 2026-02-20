@@ -57,4 +57,14 @@ public class WorkoutController {
             return ResponseEntity.status(500).body("Erro ao vincular treino: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable java.util.UUID id) {
+        try {
+            workoutService.deleteWorkoutPlan(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao excluir treino: " + e.getMessage());
+        }
+    }
 }

@@ -104,4 +104,12 @@ public class WorkoutService {
     public List<WorkoutPlan> getWorkoutsByCoach(String email) {
         return workoutPlanRepository.findByCoachEmailAndActiveTrue(email.trim().toLowerCase());
     }
+
+    @Transactional
+    public void deleteWorkoutPlan(java.util.UUID id) {
+        WorkoutPlan plan = workoutPlanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
+        plan.setActive(false);
+        workoutPlanRepository.save(plan);
+    }
 }
