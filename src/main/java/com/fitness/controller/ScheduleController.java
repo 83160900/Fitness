@@ -73,8 +73,10 @@ public class ScheduleController {
         } else {
             slot.setStatus("CANCELADO");
             slot.setRejectionReason(req.getReason());
+            ScheduleSlot saved = repository.save(slot);
+            notificationService.notifyReservationRejected(saved);
+            return ResponseEntity.ok(saved);
         }
-        return ResponseEntity.ok(repository.save(slot));
     }
 
     @PostMapping("/cancel")

@@ -32,6 +32,7 @@ public class NotificationService {
         
         String dateStr = slot.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         notification.setMessage("O aluno " + slot.getStudentEmail() + " reservou um horário para o dia " + dateStr + ". Por favor, confirme a reserva.");
+        notification.setStatus("PENDENTE");
 
         notificationRepository.save(notification);
 
@@ -60,10 +61,11 @@ public class NotificationService {
         notification.setSenderEmail(slot.getPersonalEmail());
         notification.setRecipientEmail(slot.getStudentEmail());
         notification.setSlotId(slot.getId());
-        notification.setTitle("Reserva Confirmada!");
+        notification.setTitle("Agenda Confirmada!");
 
         String dateStr = slot.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         notification.setMessage("Sua reserva para o dia " + dateStr + " foi confirmada pelo Personal.");
+        notification.setStatus("PENDENTE");
 
         notificationRepository.save(notification);
 
@@ -73,6 +75,37 @@ public class NotificationService {
             if (student.getPhone() != null && !student.getPhone().isEmpty()) {
                 try {
                     String waMessage = "Olá " + student.getName() + ", sua aula para o dia " + dateStr + " foi CONFIRMADA! Nos vemos lá.";
+                    whatsappService.sendMessage(student.getPhone(), waMessage);
+                    notification.setSentToWhatsApp(true);
+                } catch (Exception e) {
+                    notification.setWhatsappError(e.getMessage());
+                }
+                notificationRepository.save(notification);
+            }
+        });
+    }
+
+    public void notifyReservationRejected(ScheduleSlot slot) {
+        Notification notification = new Notification();
+        notification.setType("REJEICAO");
+        notification.setSenderEmail(slot.getPersonalEmail());
+        notification.setRecipientEmail(slot.getStudentEmail());
+        notification.setSlotId(slot.getId());
+        notification.setTitle("Agenda Recusada");
+
+        String dateStr = slot.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String reason = slot.getRejectionReason() != null ? slot.getRejectionReason() : "Não informado";
+        notification.setMessage("Sua reserva para o dia " + dateStr + " foi recusada pelo Personal. Motivo: " + reason);
+        notification.setStatus("PENDENTE");
+
+        notificationRepository.save(notification);
+
+        // Enviar WhatsApp para o Aluno
+        Optional<User> studentOpt = userRepository.findByEmail(slot.getStudentEmail());
+        studentOpt.ifPresent(student -> {
+            if (student.getPhone() != null && !student.getPhone().isEmpty()) {
+                try {
+                    String waMessage = "Olá " + student.getName() + ", infelizmente sua aula para o dia " + dateStr + " foi recusada.\nMotivo: " + reason;
                     whatsappService.sendMessage(student.getPhone(), waMessage);
                     notification.setSentToWhatsApp(true);
                 } catch (Exception e) {
